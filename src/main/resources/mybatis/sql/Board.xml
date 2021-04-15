@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.argonet.mvc.repository.BoardRepository">
+	<select id="getCount" parameterType="kr.co.argonet.mvc.domain.Paging" resultType="int">
+		SELECT COUNT(*)
+		FROM studydb.T_BOARD B
+	</select>
+	
+	<select id="getList" parameterType="kr.co.argonet.mvc.domain.Board" resultType="kr.co.argonet.mvc.domain.Board">
+		SELECT * 
+		 FROM(
+		   SELECT @ROWNUM:=@ROWNUM+1 RNUM,
+				D.*
+		   FROM studydb.T_BOARD D,
+			    (SELECT @ROWNUM:=0) R
+		        WHERE 1=1
+				ORDER BY D.REG_DATE DESC
+			)LIST
+			<![CDATA[
+		    WHERE RNUM >= #{startRow} AND RNUM<= #{endRow}
+		    ]]>
+	</select>
+<!-- 	<select id="getList" parameterType="kr.co.argonet.mvc.domain.Board" resultType="kr.co.argonet.mvc.domain.Board"> -->
+<!-- 		SELECT -->
+<!-- 			B.BOARD_SEQ, -->
+<!-- 			B.TITLE, -->
+<!-- 			B.CONTENTS, -->
+<!-- 			B.REG_DATE -->
+<!-- 		FROM studydb.T_BOARD B -->
+<!-- 		ORDER BY B.REG_DATE DESC -->
+<!-- 	</select> -->
+	
+	<select id="get" parameterType="int" resultType="kr.co.argonet.mvc.domain.Board">
+		SELECT
+			B.BOARD_SEQ,
+			B.TITLE,
+			B.CONTENTS,
+			B.REG_DATE
+		FROM studydb.T_BOARD B
+		WHERE B.BOARD_SEQ = #{boardSeq}
+		ORDER BY B.REG_DATE DESC
+		
+	</select>
+	
+	<insert id="save" parameterType="kr.co.argonet.mvc.domain.Board">
+		<selectKey resultType="int" keyProperty="boardSeq" order="BEFORE">
+	        SELECT MAX(BOARD_SEQ)+1 FROM studydb.T_BOARD        
+	    </selectKey>    
+		INSERT INTO studydb.T_BOARD
+		(
+			BOARD_SEQ,
+			TITLE,
+			CONTENTS,
+			REG_DATE
+		)
+		VALUES
+		(
+			#{boardSeq},
+			#{title},
+			#{contents},
+			NOW()
+			
+		)
+	</insert>
+	
+
+</mapper>
